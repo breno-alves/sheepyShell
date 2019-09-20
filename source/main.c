@@ -30,7 +30,7 @@ int main(){
     
     runner = 1; 
     while (runner){
-        
+
         getcwd(c_path, sizeof(c_path));
         printf("%s: %s $ ", USER, c_path);
         fflush(stdout);

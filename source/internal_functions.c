@@ -3,15 +3,20 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
 
 #include <dirent.h>
 
 #define MAX_LINE 80
 #define MAX_ALIAS 10
 
+/* PATH com as pastas dos programas */
+char path[6][256] = {"/usr/local/sbin","/usr/local/bin","/usr/sbin","/usr/bin","/sbin","/bin"};
+/* Guarda o comando e PATH válidos */
+char validPATH[80];
+
 
 /* Comandos internos */
-
 
 const char *internal[] = {"exit", "echo", "pwd", "cd", "mkdir", "rmdir", "history", "declare", "unset", "whoami"};
 
@@ -148,7 +153,7 @@ void declare(){
 }
 
 void unset(){
-    
+
 }
 
 int check_internal_alias(){
@@ -218,6 +223,27 @@ void reset(){
     memset(readline, 0, sizeof(readline));
 }
 
+int checkExe(){
+    int i = 0;
+    for(i = 0; i < 6; i++){
+        /*Cria um char temporario */
+        char tmp[80];
+        /*copia o path para o temporario */
+        strcpy(tmp, path[i]);
+        /*acrescenta uma barra no final */
+        strcat(tmp, "/");
+        /*Concatena o path com o valor digitado */
+        strcat(tmp, cmd);
+        /* Faz a chamada do sistema access e verifica se existe */
+        if (0 == access(tmp, 0)){
+            /* Modifica a variavel validPATH com um programa que existe nas pastas do PATH */
+            strcpy(validPATH, tmp);
+            return 1;
+        }
+    } 
+    return 0; 
+}
+
 void read_cmd(){
     int i, j, str_len;
 
@@ -251,7 +277,23 @@ void read_cmd(){
     }
 
     if(!check_internal_alias()){
-        printf("Comando nao interno..\n");
+        pid_t p = fork();
+            if(p<0){
+                printf("Erro ao criar filho");
+            } else {
+                if(p){
+                    wait(NULL);
+                } else {            
+                    if(checkExe()){
+                        if(strlen(readline) > 0) 
+                            execl(validPATH, cmd, params[0], NULL);
+                        else execl(validPATH, cmd, 0, NULL);
+                    } else {
+                        printf("O comando {%s} é inexistente!\n", cmd);
+                    }
+
+                }
+            }
     } 
 
     reset();
