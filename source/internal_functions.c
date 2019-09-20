@@ -16,10 +16,12 @@
 const char *internal[] = {"exit", "echo", "pwd", "cd", "mkdir", "rmdir", "history", "declare", "unset", "whoami"};
 
 int n_params=0;
+int n_history=0;
 
 char params[25][256];
 char cmd[256];
 char readline[256];
+char history_com[256][256];
 
 struct stat st = {0};
 
@@ -126,11 +128,28 @@ void whoami(){
     printf("%s\n", p);
 }
 
-void history();
+void history(){
+    int i;
+    
+    if(n_params > 0 && !strcmp(params[0], "-c")){
+        for(i = 0; i < n_history; i++){
+            history_com[i][0] = '\0';
+        }
+        n_history = 0;        
+    } else {
+        for(i = 0; i < n_history; i++){
+            printf("%s\n", history_com[i]);
+        }
+    }
+}
 
-void declare();
+void declare(){
 
-void unset();
+}
+
+void unset(){
+    
+}
 
 int check_internal_alias(){
     int i, idx=-1;
@@ -204,6 +223,8 @@ void read_cmd(){
 
     scanf(" %[^\n]s",readline);
     str_len = strlen(readline);
+    strcpy(history_com[n_history], readline);
+    n_history++;
 
     for(i=0; i < str_len; i++){
         if(readline[i] == ' '){
