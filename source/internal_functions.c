@@ -259,8 +259,6 @@ void read_cmd(){
         }
         cmd[i] = readline[i];
     }
-
-    /* copia os parametros para params */
     
     if(i+1 < str_len){
         n_params = 1;
