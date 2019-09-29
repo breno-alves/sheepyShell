@@ -13,7 +13,7 @@
 /* PATH com as pastas dos programas */
 char path[6][256] = {"/usr/local/sbin","/usr/local/bin","/usr/sbin","/usr/bin","/sbin","/bin"};
 /* Guarda o comando e PATH válidos */
-char validPATH[80];
+char validpath[80];
 
 
 /* Comandos internos */
@@ -39,7 +39,7 @@ void pwd(){
     getcwd(path, sizeof(path));
     
     if(path == NULL){
-        printf("Nao foi possivel obter o diretorio atual\n");
+        printf("Erro: Nao foi possivel obter o diretorio atual\n");
         return;
     }
 
@@ -50,7 +50,7 @@ void cd(const char *path){
 
     if(path != NULL){
         if(chdir(path)){
-            printf("Diretorio nao encontrado\n");
+            printf("Erro: Diretorio nao encontrado\n");
         }
     } else {
         chdir(getenv("HOME"));
@@ -80,12 +80,12 @@ void rmtree(const char path[]){
     stat(path, &stat_path);
 
     if (S_ISDIR(stat_path.st_mode) == 0) {
-        fprintf(stderr, "%s: %s\n", "Is not directory", path);
+        fprintf(stderr, "Erro: %s: %s\n", "nao eh um diretorio", path);
         exit(-1);
     }
 
     if ((dir = opendir(path)) == NULL) {
-        fprintf(stderr, "%s: %s\n", "Can`t open directory", path);
+        fprintf(stderr, "Erro: %s: %s\n", "nao eh um diretorio", path);
         exit(-1);
     }
 
@@ -109,15 +109,15 @@ void rmtree(const char path[]){
         }
 
         if (unlink(full_path) == 0)
-            printf("Removed a file: %s\n", full_path);
+            printf("Removido arquivo: %s\n", full_path);
         else
-            printf("Can`t remove a file: %s\n", full_path);
+            printf("Erro: nao pode ser removido o arquivo: %s\n", full_path);
     }
 
     if (rmdir(path) == 0)
-        printf("Removed a directory: %s\n", path);
+        printf("removido o diretorio: %s\n", path);
     else
-        printf("Can`t remove a directory: %s\n", path);
+        printf("Erro: nao foi possivel remover o diretorio %s\n", path);
 
     closedir(dir);
 }
@@ -226,18 +226,13 @@ void reset(){
 int checkExe(){
     int i = 0;
     for(i = 0; i < 6; i++){
-        /*Cria um char temporario */
         char tmp[80];
-        /*copia o path para o temporario */
         strcpy(tmp, path[i]);
-        /*acrescenta uma barra no final */
         strcat(tmp, "/");
-        /*Concatena o path com o valor digitado */
         strcat(tmp, cmd);
-        /* Faz a chamada do sistema access e verifica se existe */
+
         if (0 == access(tmp, 0)){
-            /* Modifica a variavel validPATH com um programa que existe nas pastas do PATH */
-            strcpy(validPATH, tmp);
+            strcpy(validpath, tmp);
             return 1;
         }
     } 
@@ -278,17 +273,17 @@ void read_cmd(){
     if(!check_internal_alias()){
         pid_t p = fork();
             if(p<0){
-                printf("Erro ao criar filho");
+                printf("Erro: nao foi possivel criar filho");
             } else {
                 if(p){
                     wait(NULL);
                 } else {            
                     if(checkExe()){
                         if(strlen(readline) > 0) 
-                            execl(validPATH, cmd, params[0], NULL);
-                        else execl(validPATH, cmd, 0, NULL);
+                            execl(validpath, cmd, params[0], NULL);
+                        else execl(validpath, cmd, 0, NULL);
                     } else {
-                        printf("O comando {%s} é inexistente!\n", cmd);
+                        printf("Erro: O comando {%s} é inexistente!\n", cmd);
                     }
 
                 }
