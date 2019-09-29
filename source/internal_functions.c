@@ -246,7 +246,8 @@ int checkExe(){
 
 void read_cmd(){
     int i, j, str_len;
-
+    int cont = 0;
+    
     scanf(" %[^\n]s",readline);
     str_len = strlen(readline);
     strcpy(history_com[n_history], readline);
@@ -260,7 +261,7 @@ void read_cmd(){
     }
 
     /* copia os parametros para params */
-    int cont = 0;
+    
     if(i+1 < str_len){
         n_params = 1;
         for(i=i+1, j=0; i < str_len; i++){
